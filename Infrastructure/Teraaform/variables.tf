@@ -1,49 +1,29 @@
-# Common
-variable "airid" {
-  description = "Accenture CIO 'AIRID' tag. Changing this forces a new resource to be created."
-  type        = string
-}
 
 # Resource Group
-// variable "resource-group__subscription_id" {
-//   description = "Subscription ID where the resource group will be created."
-//   type        = string
-//   default     = ""
-// }
-// variable "resource-group__resource_group_location" {
-//   description = "Azure region where the resource group will be created."
-//   type        = string
-//   default     = "eastus2"
-// }
-// variable "resource-group__resource_group_app_name" {
-//   description = "Application name that the resource group is being created for."
-//   type        = string
-// }
-// variable "resource-group__environment" {
-//   description = "Accenture CIO 'Environment' tag. Changing this forces a new resource to be created."
-//   type        = string
-// }
-
-#Function APP
-variable "environment" {
-  description = "Accenture CIO 'Environment' tag. Changing this forces a new resource to be created."
+variable "resource_group_name" {
+  description = "The name of the resource group"
   type        = string
-  default     = ""
 }
 
 variable "location" {
-  description = "Azure location/region"
+  description = "The Azure location where the resource group will be created"
   type        = string
-  default     = ""
 }
 
-variable "zip_file" {
+#Function APP
+
+variable "function_app_name" {
+  description = "The name of the Azure Function App."
   type        = string
-  description = "zip file name which need to be uploaded"
 }
 
-variable "resource_group_name" {
-  description = "Resource Group Name"
+variable "storage_account_name" {
+  description = "The name of the storage account for the Function App."
+  type        = string
+}
+
+variable "app_service_plan_id" {
+  description = "The ID of the App Service Plan to be used by the Function App."
   type        = string
 }
 
@@ -53,16 +33,6 @@ variable "function_language" {
   default     = "dotnet"
 }
 
-variable "plan_sku" {
-  description = "The SKU for the plan. Possible values include B1, B2, B3, D1, F1, I1, I2, I3, I1v2, I2v2, I3v2, I4v2, I5v2, I6v2, P1v2, P2v2, P3v2, P0v3, P1v3, P2v3, P3v3, P1mv3, P2mv3, P3mv3, P4mv3, P5mv3, S1, S2, S3, SHARED, EP1, EP2, EP3, WS1, WS2, WS3, and Y1."
-  type        = string
-  default     = "Y1"
-}
-
-variable "auth_client_id" {
-  type        = string
-  description = "Azure AAD Authentication's client ID which need to be added"
-}
 
 variable "auth_allowed_audiences" {
   description = "Authorization Allowed Audiences For the Function App"
@@ -102,35 +72,52 @@ variable "function_name" {
   default     = ""
 }
 
+# Azure SQL Database
 
-variable "python_version" {
-  description = "The version of Python to run. Possible values are 3.12, 3.11, 3.10, 3.9, 3.8 and 3.7"
+variable "sql_server_name" {
+  description = "The name of the Azure SQL Server."
   type        = string
-  default     = null
 }
 
-
-variable "cors_input" {
-  description = "It will add the CORS entity"
-  type = object({
-    allowed_origins     = list(string)
-    support_credentials = bool
-  })
-  default = {
-    allowed_origins     = ["https://accenture.com"]
-    support_credentials = false
-  }
-}
-
-variable "min_tls_cipher_suite" {
-  description = "Configure minimum TLS Cipher Suite. All incoming requests from clients that only support TLS Cipher Suites less secure than the set minimum will be rejected by the front-end. This is only available for Premium App Service Plans."
+variable "sql_database_name" {
+  description = "The name of the Azure SQL Database."
   type        = string
-  default     = null
 }
+
+variable "location" {
+  description = "The Azure location where the resources will be created."
+  type        = string
+}
+
+variable "admin_username" {
+  description = "The administrator username for the SQL Server."
+  type        = string
+}
+
+variable "admin_password" {
+  description = "The administrator password for the SQL Server."
+  type        = string
+  sensitive   = true
+}
+
 
 #Role Assignment
-variable "service_principal_name" {
-  description = "Name of system assigned managed identity"
+variable "function_app_id" {
+  description = "The ID of the Azure Function App"
   type        = string
-  default     = null
+}
+
+variable "sql_server_id" {
+  description = "The ID of the Azure SQL Server"
+  type        = string
+}
+
+variable "role_definition_name" {
+  description = "The role definition name for the role assignment"
+  type        = string
+}
+
+variable "function_app_principal_id" {
+  description = "The principal ID of the Function App"
+  type        = string
 }
