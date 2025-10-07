@@ -1,0 +1,77 @@
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  TF_VERSION: '1.5.7'  # Update as needed
+  TF_WORKING_DIR: './terraform'  # Path to your .tf files
+
+stages:
+  - stage: Terraform_Apply
+    jobs:
+      - job: ApplyTerraform
+        steps:
+
+          - task: Bash@3
+            displayName: 'Install Terraform'
+            inputs:
+              targetType: 'inline'
+              script: |
+                wget https://releases.hashicorp.com/terraform/$(TF_VERSION)/terraform_$(TF_VERSION)_linux_amd64.zip
+                unzip terraform_$(TF_VERSION)_linux_amd64.zip
+                sudo mv terraform /usr/local/bin/
+                terraform version
+
+          - script: |
+              echo "Initializing Terraform..."
+              terraform init
+            workingDirectory: $(TF_WORKING_DIR)
+            env:
+              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+              ARM_TENANT_ID: $(ARM_TENANT_ID)
+
+          - script: |
+              echo "Planning Terraform..."
+              terraform plan -out=tfplan
+            workingDirectory: $(TF_WORKING_DIR)
+            env:
+              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+              ARM_TENANT_ID: $(ARM_TENANT_ID)
+
+          - script: |
+              echo "Applying Terraform..."
+              terraform apply -auto-approve tfplan
+            workingDirectory: $(TF_WORKING_DIR)
+            env:
+              ARM_CLIENT_ID: $(ARM_CLIENT_ID)
+              ARM_CLIENT_SECRET: $(ARM_CLIENT_SECRET)
+              ARM_SUBSCRIPTION_ID: $(ARM_SUBSCRIPTION_ID)
+              ARM_TENANT_ID: $(ARM_TENANT_ID)
+
+      - job: ApplyRole
+        steps:
+          - task: AzureCLI@2
+            displayName: 'Assign Identity to Function App'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az functionapp identity assign --name $(functionAppName) --resource-group $(resourceGroupName)
+
+          - task: AzureCLI@2
+            displayName: 'Assign Role to Function App for SQL Access'
+            inputs:
+              azureSubscription: $(azureSubscription)
+              scriptType: 'bash'
+              scriptLocation: 'inlineScript'
+              inlineScript: |
+                az role assignment create --assignee $(functionAppName) --role "Contributor" --scope /subscriptions/{subscription-id}/resourceGroups/$(resourceGroupName)/providers/Microsoft.Sql/servers/$(sqlServerName)/databases/$(sqlDatabaseName)
