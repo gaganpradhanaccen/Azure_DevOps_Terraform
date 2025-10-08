@@ -17,7 +17,7 @@ resource "azurerm_function_app" "function_app" {
   storage_account_name       = azurerm_storage_account.function_app_storage_account.name
   storage_account_access_key = azurerm_storage_account.function_app_storage_account.primary_access_key
   version                    = "~3"
-  os_type                    = "linux"
+  os_type                    = "windows"
 
   identity {
     type = "SystemAssigned"
@@ -86,4 +86,5 @@ resource "azurerm_role_assignment" "function_app_sql_access" {
   role_definition_name = "Contributor"
   scope          = azurerm_sql_database.example.id
 }
+
 
